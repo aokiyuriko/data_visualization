@@ -1,0 +1,20 @@
+#Import the file "state_unemp.xlsx" as a Pandas data frame called unemp. 
+#This file (downloaded from https://www.bls.gov/lau/rdscnp16.htm) contains measures of the population, 
+#labor force, employment, unemployment, and unemployment rate by state (plus New York City and Los Angeles County) 
+#in each month from January 1976 to September 2018. 
+
+unemp = pd.read_excel('state_unemp.xlsx',skiprows=7, usecols=[1,2,3,10])
+unemp.columns = ['state', 'year', 'month', 'unemp_rate']
+unemp.head()
+
+unemp = unemp[-unemp['state'].isin(["Los Angeles County", "New York city"])]
+
+unemp['day']='1'
+unemp['year']=unemp['year'].astype(str)
+unemp['month']=unemp['month'].astype(str)
+unemp['date']=unemp['year']+'-'+ unemp['month']+'-'+unemp['day']
+unemp['date']=pd.to_datetime(unemp['date'],yearfirst=True)
+unemp = unemp.drop(['year','month','day'], axis = 1)
+unemp = unemp[['state','date','unemp_rate']]
+
+unemp_state = unemp.groupby(['state','date']).resample('q',level=1).mean()
